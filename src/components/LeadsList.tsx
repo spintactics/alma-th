@@ -80,6 +80,32 @@ export default function LeadsList() {
     }
   };
 
+  const generatePageNumbers = () => {
+    const pages: number[] = [];
+
+    if (totalPages <= 11) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 6) {
+        for (let i = 1; i <= 11; i++) {
+          pages.push(i);
+        }
+      } else if (currentPage > totalPages - 6) {
+        for (let i = totalPages - 10; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        for (let i = currentPage - 5; i <= currentPage + 5; i++) {
+          pages.push(i);
+        }
+      }
+    }
+
+    return pages;
+  };
+
   return (
     <div className="relative">
       {/* Search and Filter Controls */}
@@ -103,7 +129,7 @@ export default function LeadsList() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="p-2 border border-gray-300 rounded-lg shadow-sm"
+          className="p-2 border border-gray-300 rounded-lg shadow-sm text-gray-400"
         >
           <option value="All">Status</option>
           <option value="Pending">Pending</option>
@@ -124,7 +150,7 @@ export default function LeadsList() {
           </thead>
           <tbody>
             {currentLeads.map((lead) => (
-              <tr key={lead.id} className="border-t border-gray-300">
+              <tr key={lead.id} className="border-t border-gray-300 h-16">
                 <td className="p-3 text-gray-800">{lead.firstName} {lead.lastName}</td>
                 <td className="p-3 text-gray-800">{new Date(lead.submittedAt).toLocaleString()}</td>
                 <td className="p-3 text-gray-800">
@@ -150,7 +176,7 @@ export default function LeadsList() {
           </tbody>
         </table>
 
-        {/* Pagination (hidden if only one page) */}
+        {/* Pagination aligned to the right */}
         {totalPages > 1 && (
           <div className="flex justify-end p-4 space-x-2 bg-white border-t border-gray-300">
             <button
@@ -160,7 +186,19 @@ export default function LeadsList() {
             >
               &lt;
             </button>
-            <span className="p-2 text-gray-700">{currentPage} / {totalPages}</span>
+            {generatePageNumbers().map((page) => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`p-2 rounded-lg ${
+                  page === currentPage
+                    ? "bg-gray-700 text-white"
+                    : "bg-white text-gray-700 border border-gray-300"
+                }`}
+              >
+                {page}
+              </button>
+            ))}
             <button
               onClick={handleNextPage}
               className="p-2 text-gray-700 rounded-lg disabled:opacity-50"
