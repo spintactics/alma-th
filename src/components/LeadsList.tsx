@@ -16,11 +16,17 @@ interface Lead {
   submittedAt: string;
 }
 
+type SortConfig = {
+  key: keyof Lead | null;
+  direction: "asc" | "desc";
+};
+
 export default function LeadsList() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: "asc" });
   const leadsPerPage = 8;
 
   useEffect(() => {
@@ -56,17 +62,48 @@ export default function LeadsList() {
     }
   };
 
+  // Sorting function
+  const sortLeads = (leads: Lead[]) => {
+    if (!sortConfig.key) return leads;
+  
+    const sortedLeads = [...leads].sort((a, b) => {
+      const key = sortConfig.key as keyof Lead;
+      
+      const aValue = a[key];
+      const bValue = b[key];
+      
+      if (aValue === undefined || bValue === undefined) return 0;
+  
+      if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+  
+    return sortedLeads;
+  };
+  
+
+  const handleSort = (key: keyof Lead) => {
+    let direction: "asc" | "desc" = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
   const filteredLeads = leads.filter((lead) =>
     (statusFilter === "All" || lead.state === statusFilter) &&
     (lead.firstName.toLowerCase().includes(search.toLowerCase()) ||
      lead.lastName.toLowerCase().includes(search.toLowerCase()))
   );
 
+  const sortedAndFilteredLeads = sortLeads(filteredLeads);
+
   // Pagination logic
-  const totalLeads = filteredLeads.length;
+  const totalLeads = sortedAndFilteredLeads.length;
   const totalPages = Math.ceil(totalLeads / leadsPerPage);
   const startIdx = (currentPage - 1) * leadsPerPage;
-  const currentLeads = filteredLeads.slice(startIdx, startIdx + leadsPerPage);
+  const currentLeads = sortedAndFilteredLeads.slice(startIdx, startIdx + leadsPerPage);
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
@@ -142,10 +179,26 @@ export default function LeadsList() {
         <table className="w-full">
           <thead>
             <tr className="bg-gray-50">
-              <th className="p-3 text-left text-gray-500">Name</th>
-              <th className="p-3 text-left text-gray-500">Submitted</th>
-              <th className="p-3 text-left text-gray-500">Status</th>
-              <th className="p-3 text-left text-gray-500">Country</th>
+              <th className="p-3 text-left text-gray-500 cursor-pointer" onClick={() => handleSort("firstName")}>
+                Name {sortConfig.key === "firstName" && (
+                  <img src={sortConfig.direction === "asc" ? "/assets/arrow-up.svg" : "/assets/arrow-down.svg"} className="inline ml-1 w-3 h-3" />
+                )}
+              </th>
+              <th className="p-3 text-left text-gray-500 cursor-pointer" onClick={() => handleSort("submittedAt")}>
+                Submitted {sortConfig.key === "submittedAt" && (
+                  <img src={sortConfig.direction === "asc" ? "/assets/arrow-up.svg" : "/assets/arrow-down.svg"} className="inline ml-1 w-3 h-3" />
+                )}
+              </th>
+              <th className="p-3 text-left text-gray-500 cursor-pointer" onClick={() => handleSort("state")}>
+                Status {sortConfig.key === "state" && (
+                  <img src={sortConfig.direction === "asc" ? "/assets/arrow-up.svg" : "/assets/arrow-down.svg"} className="inline ml-1 w-3 h-3" />
+                )}
+              </th>
+              <th className="p-3 text-left text-gray-500 cursor-pointer" onClick={() => handleSort("citizenship")}>
+                Country {sortConfig.key === "citizenship" && (
+                  <img src={sortConfig.direction === "asc" ? "/assets/arrow-up.svg" : "/assets/arrow-down.svg"} className="inline ml-1 w-3 h-3" />
+                )}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -176,7 +229,7 @@ export default function LeadsList() {
           </tbody>
         </table>
 
-        {/* Pagination aligned to the right */}
+        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex justify-end p-4 space-x-2 bg-white border-t border-gray-300">
             <button
