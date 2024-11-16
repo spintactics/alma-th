@@ -67,6 +67,10 @@ To access the **Internal Leads List**, use the following credentials:
 - **JsonForms**: JSON Schema-driven form generation
 - **Tailwind CSS**: Utility-first CSS framework
 
+## Documentation
+- [Design Decisions](./docs/design-decisions.md)
+- [System Design](./docs/system-design.md)
+
 ## Contact
 
 For further assistance or inquiries, please contact [ycfang87@gmail.com](mailto:ycfang87@gmail.com).
