@@ -9,6 +9,7 @@
 - **Customizations**: Added CSS overrides for multi-select field colors.
 
 ## Project Structure
+```bash
 .
 ├── src/
 │   ├── app/
@@ -25,6 +26,7 @@
 ├── package.json                 # Project metadata and dependencies
 └── README.md                    # Documentation
 └── docs/                        # Further Documentation on design decisions & system design
+```
 
 
 
