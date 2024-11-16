@@ -117,37 +117,37 @@ Purpose: Handles fetching for all leads.
 **Storage**: Credentials validated in-memory (not production-ready).
 
 ### 7. Data Flow
-- 1. User Interaction
+1. User Interaction
 A user accesses the Public Lead Form and submits data.
-- 2. Frontend Validation
+2. Frontend Validation
 Validates input dynamically (e.g., required fields, email formatting).
-- 3. Backend Processing
-Processes data via the /api/leads route.
-Validates data again and stores it in memory.
-- 4. Internal Leads List
+3. Backend Processing
+- Processes data via the /api/leads route.
+- Validates data again and stores it in memory.
+4. Internal Leads List
 Displays submitted leads upon successful login.
 
 ### 8. Future Improvements
-- 1. Persistent Storage
-Use a database (e.g., PostgreSQL or MongoDB) instead of in-memory storage.
-Leverage ORM tools like Prisma for easier schema management.
-- 2. Enhanced Authentication
-Use industry-standard protocols like OAuth2 or JWT for secure authentication.
-Protect API routes with middleware to ensure only authenticated requests.
-- 3. Error Tracking
-Implement error tracking tools like Sentry.
-Ensure robust error messages and API response handling.
-- 4. Scalability
-Deploy the application on cloud services like AWS.
-Introduce caching mechanisms to optimize performance.
-- 5. Automated tests
-Introduce unit tests for key components like the Public Lead Form and the Leads List page using a testing framework like Jest or React Testing Library.
-Add integration tests for the /api/leads endpoint to validate proper handling of input data and response structure.
-Incorporate end-to-end tests using Cypress to simulate user interactions and ensure the app behaves as expected.
-- 6. Mobile-Friendly View
-Optimize the UI for responsiveness to provide a seamless experience on smaller devices.
-Adjust styles and layouts to ensure fields and buttons scale properly on mobile screens.
-Test touch interactions (e.g., dropdowns and file uploads) to ensure usability on mobile devices.
+1. Persistent Storage
+- Use a database (e.g., PostgreSQL or MongoDB) instead of in-memory storage.
+- Leverage ORM tools like Prisma for easier schema management.
+2. Enhanced Authentication
+- Use industry-standard protocols like OAuth2 or JWT for secure authentication.
+- Protect API routes with middleware to ensure only authenticated requests.
+3. Error Tracking
+- Implement error tracking tools like Sentry.
+- Ensure robust error messages and API response handling.
+4. Scalability
+- Deploy the application on cloud services like AWS.
+- Introduce caching mechanisms to optimize performance.
+5. Automated tests
+- Introduce unit tests for key components like the Public Lead Form and the Leads List page using a testing framework like Jest or React Testing Library.
+- Add integration tests for the /api/leads endpoint to validate proper handling of input data and response structure.
+- Incorporate end-to-end tests using Cypress to simulate user interactions and ensure the app behaves as expected.
+6. Mobile-Friendly View
+- Optimize the UI for responsiveness to provide a seamless experience on smaller devices.
+- Adjust styles and layouts to ensure fields and buttons scale properly on mobile screens.
+- Test touch interactions (e.g., dropdowns and file uploads) to ensure usability on mobile devices.
 
 ### 9. Conclusion
 
