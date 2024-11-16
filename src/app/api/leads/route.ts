@@ -1,33 +1,34 @@
 import { NextResponse } from "next/server";
 
-// let leads: { id: number; state: string; [key: string]: any }[] = [];
-
-// export async function GET() {
-//   return NextResponse.json(leads, { status: 200 });
-// }
-
-// remove below and uncomment above when mocking is done
-let leads: { id: number; state: string; [key: string]: any }[] = Array.from(
-  { length: 200 },
-  (_, i) => ({
-    id: i + 1,
-    firstName: `Lead${i + 1}`,
-    lastName: `Last${i + 1}`,
-    email: `lead${i + 1}@example.com`,
-    citizenship: ["United States", "Mexico", "Brazil", "France", "Canada"][i % 5],
-    website: `https://example.com/lead${i + 1}`,
-    visaCategories: ["H1B", "L1", "O1"],
-    helpText: "Need help with visa options",
-    state: i % 3 === 0 ? "Pending" : "Reached Out",
-    submittedAt: new Date().toISOString(),
-  })
-);
+// below uses the user submitted data on the main form page
+let leads: { id: number; state: string; [key: string]: any }[] = [];
 
 export async function GET() {
-  return new Response(JSON.stringify(leads), { status: 200 });
+  return NextResponse.json(leads, { status: 200 });
 }
+// above uses the user submitted data on the main form page
 
-// remove above when mocking is done
+// below will generate mock data for viewing large amounts of leads data
+// let leads: { id: number; state: string; [key: string]: any }[] = Array.from(
+//   { length: 200 },
+//   (_, i) => ({
+//     id: i + 1,
+//     firstName: `Lead${i + 1}`,
+//     lastName: `Last${i + 1}`,
+//     email: `lead${i + 1}@example.com`,
+//     citizenship: ["United States", "Mexico", "Brazil", "France", "Canada"][i % 5],
+//     website: `https://example.com/lead${i + 1}`,
+//     visaCategories: ["H1B", "L1", "O1"],
+//     helpText: "Need help with visa options",
+//     state: i % 3 === 0 ? "Pending" : "Reached Out",
+//     submittedAt: new Date().toISOString(),
+//   })
+// );
+
+// export async function GET() {
+//   return new Response(JSON.stringify(leads), { status: 200 });
+// }
+// above will generate mock data for viewing large amounts of leads data
 
 export async function POST(req: Request) {
   try {
@@ -37,7 +38,7 @@ export async function POST(req: Request) {
     // Extract form fields
     const newLead = {
       id: Date.now(),
-      state: "PENDING",
+      state: "Pending",
       firstName: formData.get("firstName") || "",
       lastName: formData.get("lastName") || "",
       email: formData.get("email") || "",
@@ -46,6 +47,7 @@ export async function POST(req: Request) {
       visaCategories: JSON.parse(formData.get("visaCategories") as string || "[]"),
       helpText: formData.get("helpText") || "",
       resume: formData.get("resume"), // This will be a File object
+      submittedAt: formData.get("submittedAt")
     };
 
     // Save lead to in-memory storage

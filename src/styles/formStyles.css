@@ -7,3 +7,14 @@
   height: auto;
   white-space: normal;
 }
+
+legend.MuiFormLabel-root {
+  display: none;
+}
+
+textarea {
+  resize: vertical !important;
+}
+
+/* Target descriptions in JSONForms */
+

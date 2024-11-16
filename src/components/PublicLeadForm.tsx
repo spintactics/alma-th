@@ -54,7 +54,6 @@ export default function PublicLeadForm() {
     if (!formData.helpText?.trim()) newErrors.helpText = "Please describe how we can help you.";
     if (!formData.resume) newErrors.resume = "Resume upload is required.";
 
-    console.log({newErrors})
     setErrors(newErrors);
 
     // Return true if no errors
@@ -70,6 +69,13 @@ export default function PublicLeadForm() {
     }));
   };
 
+  const handleHelpTextChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setFormData((prev) => ({
+      ...prev,
+      helpText: event.target.value,
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitted(true);
@@ -80,6 +86,9 @@ export default function PublicLeadForm() {
     }
 
     const formDataToSend = new FormData();
+
+    const now = new Date().toISOString();
+
     for (const key in formData) {
       const value = formData[key as keyof FormData];
       if (key === "resume" && value instanceof File) {
@@ -90,6 +99,8 @@ export default function PublicLeadForm() {
         formDataToSend.append(key, value as string);
       }
     }
+
+    formDataToSend.append("submittedAt", now);
 
     try {
       const response = await fetch("/api/leads", {
@@ -124,13 +135,12 @@ export default function PublicLeadForm() {
     required: ["firstName", "lastName", "email", "citizenship", "website"],
   };
 
-  const schemaBelow = {
+  const schemaMid = {
     type: "object",
     properties: {
-      visaCategories: leadFormSchema.properties.visaCategories,
-      helpText: leadFormSchema.properties.helpText,
+      visaCategories: leadFormSchema.properties.visaCategories
     },
-    required: ["visaCategories", "helpText"],
+    required: ["visaCategories"],
   };
 
   const uiSchemaAbove = {
@@ -138,9 +148,9 @@ export default function PublicLeadForm() {
     elements: leadFormUiSchema.elements.slice(0, 5),
   };
 
-  const uiSchemaBelow = {
+  const uiSchemaMid = {
     type: "VerticalLayout",
-    elements: leadFormUiSchema.elements.slice(5),
+    elements: leadFormUiSchema.elements.slice(5, 6),
   };
 
   return (
@@ -181,17 +191,47 @@ export default function PublicLeadForm() {
         {isSubmitted && errors.resume && (
           <p className="text-red-500 text-sm mt-1">{errors.resume}</p>
         )}
-        <JsonForms
-          schema={schemaBelow}
-          uischema={uiSchemaBelow}
-          data={formData}
-          renderers={[...materialRenderers]}
-          validationMode={ isSubmitted ? "ValidateAndShow" : "ValidateAndHide"}
-          onChange={({ data }) => {
-            setFormData(data as FormData);
-          }}
+        <img
+          src="/assets/die.png"
+          alt="die"
+          className="h-14 my-4 mx-auto"
         />
-        <button type="submit" className="bg-gray-800 text-white py-3 px-6 rounded-lg">
+        <h2 className="text-2xl text-black font-semibold mb-5">Visa categories of interest?</h2>
+        <div className={`${isSubmitted && errors.visaCategories ? 'border border-red-500 rounded' : ''}`}>
+          <JsonForms
+            schema={schemaMid}
+            uischema={uiSchemaMid}
+            data={formData}
+            renderers={[...materialRenderers]}
+            validationMode={ isSubmitted ? "ValidateAndShow" : "ValidateAndHide"}
+            onChange={({ data }) => {
+              setFormData(data as FormData);
+            }}
+          />
+        </div>
+        {isSubmitted && errors.visaCategories && (
+          <p className="text-red-500 text-sm mt-1">{errors.visaCategories}</p>
+        )}
+        <img
+          src="/assets/heart.png"
+          alt="die"
+          className="h-14 my-4 mx-auto"
+        />
+        <h2 className="text-2xl text-black font-semibold mb-5">How can we help you?</h2>
+        <div className={`space-y-2 ${isSubmitted && errors.helpText ? "border border-red-500 rounded p-2" : "border border-gray-300 rounded p-2"}`}>
+          <textarea
+            id="helpText"
+            value={formData.helpText || ""}
+            placeholder="What is your current status and when does it expire? What is your past immigration history? Are you looking for long-term permanent residency or short-term employment visa or both? Are there any timeline considerations?"
+            onChange={handleHelpTextChange}
+            className="w-full text-gray-700 focus:outline-none"
+            rows={4}
+          />
+        </div>
+        {isSubmitted && errors.helpText && (
+          <p className="text-red-500 text-sm mt-1">{errors.helpText}</p>
+        )}
+        <button type="submit" className="bg-black text-white py-3 px-6 rounded-lg w-full">
           Submit
         </button>
       </form>

@@ -14,8 +14,7 @@
         "enum": ["O-1", "EB-1A", "EB-2 NIW", "I don't know"]
       },
       "uniqueItems": true
-    },
-    "helpText": { "type": "string", "title": "How Can We Help You?" }
+    }
   },
-  "required": ["firstName", "lastName", "email", "citizenship", "website", "visaCategories", "helpText"]
+  "required": ["firstName", "lastName", "email", "citizenship", "website", "visaCategories"]
 }

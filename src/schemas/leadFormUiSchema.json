@@ -9,11 +9,10 @@
     {
       "type": "Control",
       "scope": "#/properties/visaCategories",
-      "options": { "multi": true }
-    },
-    {
-      "type": "Control",
-      "scope": "#/properties/helpText"
+      "options": {
+        "multi": true,
+        "showLabel": false
+      }
     }
   ]
 }

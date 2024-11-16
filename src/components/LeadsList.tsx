@@ -143,6 +143,18 @@ export default function LeadsList() {
     return pages;
   };
 
+  const formatTimestamp = (isoString: string) => {
+    const date = new Date(isoString);
+    return date.toLocaleString("en-US", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
   return (
     <div className="relative">
       {/* Search and Filter Controls */}
@@ -205,7 +217,7 @@ export default function LeadsList() {
             {currentLeads.map((lead) => (
               <tr key={lead.id} className="border-t border-gray-300 h-16">
                 <td className="p-3 text-gray-800">{lead.firstName} {lead.lastName}</td>
-                <td className="p-3 text-gray-800">{new Date(lead.submittedAt).toLocaleString()}</td>
+                <td className="p-3 text-gray-800">{formatTimestamp(lead.submittedAt)}</td>
                 <td className="p-3 text-gray-800">
                   <div className="flex items-center space-x-4">
                     <span>{lead.state}</span>
