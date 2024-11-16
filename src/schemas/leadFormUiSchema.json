@@ -6,8 +6,14 @@
     { "type": "Control", "scope": "#/properties/email" },
     { "type": "Control", "scope": "#/properties/citizenship" },
     { "type": "Control", "scope": "#/properties/website" },
-    { "type": "Control", "scope": "#/properties/resume" },
-    { "type": "Control", "scope": "#/properties/visaCategories" },
-    { "type": "Control", "scope": "#/properties/helpText" }
+    {
+      "type": "Control",
+      "scope": "#/properties/visaCategories",
+      "options": { "multi": true }
+    },
+    {
+      "type": "Control",
+      "scope": "#/properties/helpText"
+    }
   ]
 }

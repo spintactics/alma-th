@@ -1,0 +1,9 @@
+.MuiFormControlLabel-label {
+  color: black !important;
+}
+
+.MuiFormGroup-root {
+  flex-direction: column !important;
+  height: auto;
+  white-space: normal;
+}

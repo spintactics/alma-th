@@ -1,68 +1,104 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { JsonForms } from "@jsonforms/react";
+import { materialRenderers } from "@jsonforms/material-renderers";
 import { useRouter } from "next/navigation";
+import leadFormSchema from "@/schemas/leadFormSchema.json";
+import leadFormUiSchema from "@/schemas/leadFormUiSchema.json";
+import "@/styles/formStyles.css";
+
+// Define FormData interface with all required fields
+interface FormData {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  citizenship?: string;
+  website?: string;
+  visaCategories?: string[];
+  helpText?: string;
+  resume?: File | null;
+}
 
 export default function PublicLeadForm() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    citizenship: "",
-    website: "",
-    visaCategories: [] as string[],
-    helpText: "",
-    resume: null as File | null,
-  });
+  const [formData, setFormData] = useState<FormData>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isClient, setIsClient] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  // Ensure JsonForms only renders on the client
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (isSubmitted) {
+      validateForm();
+    }
+  }, [formData, isSubmitted]);
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.firstName?.trim()) newErrors.firstName = "First Name is required.";
+    if (!formData.lastName?.trim()) newErrors.lastName = "Last Name is required.";
+    if (!formData.email?.trim()) newErrors.email = "Email is required.";
+    else if (!/^\S+@\S+\.\S+$/.test(formData.email))
+      newErrors.email = "Please enter a valid email address.";
+    if (!formData.citizenship?.trim())
+      newErrors.citizenship = "Country of Citizenship is required.";
+    if (!formData.website?.trim()) newErrors.website = "Website URL is required.";
+    if (!formData.visaCategories || formData.visaCategories.length === 0)
+      newErrors.visaCategories = "At least one visa category must be selected.";
+    if (!formData.helpText?.trim()) newErrors.helpText = "Please describe how we can help you.";
+    if (!formData.resume) newErrors.resume = "Resume upload is required.";
+
+    console.log({newErrors})
+    setErrors(newErrors);
+
+    // Return true if no errors
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value, checked } = e.target;
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+
     setFormData((prev) => ({
       ...prev,
-      visaCategories: checked
-        ? [...prev.visaCategories, value]
-        : prev.visaCategories.filter((category) => category !== value),
+      resume: file,
     }));
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files ? e.target.files[0] : null;
-    setFormData((prev) => ({ ...prev, resume: file }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitted(true);
 
-    // Prepare the form data for submission
-    const formDataToSend = new FormData();
-    formDataToSend.append("firstName", formData.firstName);
-    formDataToSend.append("lastName", formData.lastName);
-    formDataToSend.append("email", formData.email);
-    formDataToSend.append("citizenship", formData.citizenship);
-    formDataToSend.append("website", formData.website);
-    formDataToSend.append("helpText", formData.helpText);
-    formDataToSend.append("visaCategories", JSON.stringify(formData.visaCategories));
-
-    if (formData.resume) {
-      formDataToSend.append("resume", formData.resume);
+    if (!validateForm()) {
+      console.log('validation failed')
+      return; // Do not proceed if validation fails
     }
-    
-    // Assuming this submission is successful
+
+    const formDataToSend = new FormData();
+    for (const key in formData) {
+      const value = formData[key as keyof FormData];
+      if (key === "resume" && value instanceof File) {
+        formDataToSend.append(key, value);
+      } else if (Array.isArray(value)) {
+        formDataToSend.append(key, JSON.stringify(value));
+      } else {
+        formDataToSend.append(key, value as string);
+      }
+    }
+
     try {
-      // Replace with actual API call if necessary
       const response = await fetch("/api/leads", {
         method: "POST",
         body: formDataToSend,
       });
 
       if (response.ok) {
-        router.push("/thank-you"); // Redirect to the Thank You page
+        router.push("/thank-you");
       } else {
         alert("Failed to submit the form.");
       }
@@ -72,117 +108,89 @@ export default function PublicLeadForm() {
     }
   };
 
-  return (
-    <div className="max-w-xl mx-auto p-4 text-center">
-      <header className="bg-green-100 p-8 rounded-lg mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Get An Assessment Of Your Immigration Case</h1>
-      </header>
+  if (!isClient) {
+    return null; // Prevent server-side rendering
+  }
 
-      <p className="text-lg text-gray-600 mb-8">
-        Submit the form below and our team of experienced attorneys will review your information...
+  const schemaAbove = {
+    type: "object",
+    properties: {
+      firstName: leadFormSchema.properties.firstName,
+      lastName: leadFormSchema.properties.lastName,
+      email: leadFormSchema.properties.email,
+      citizenship: leadFormSchema.properties.citizenship,
+      website: leadFormSchema.properties.website
+    },
+    required: ["firstName", "lastName", "email", "citizenship", "website"],
+  };
+
+  const schemaBelow = {
+    type: "object",
+    properties: {
+      visaCategories: leadFormSchema.properties.visaCategories,
+      helpText: leadFormSchema.properties.helpText,
+    },
+    required: ["visaCategories", "helpText"],
+  };
+
+  const uiSchemaAbove = {
+    type: "VerticalLayout",
+    elements: leadFormUiSchema.elements.slice(0, 5),
+  };
+
+  const uiSchemaBelow = {
+    type: "VerticalLayout",
+    elements: leadFormUiSchema.elements.slice(5),
+  };
+
+  return (
+    <div className="max-w-xl mx-auto p-4 text-center bg-white">
+      <img
+        src="/assets/i-file.png"
+        alt="i file"
+        className="h-14 mb-4 mx-auto"
+      />
+      <h2 className="text-2xl text-black font-semibold mb-5">Want to understand your visa options?</h2>
+      <p className="text-lg text-black font-semibold mb-8">
+        Submit the form below and our team of experienced attorneys will review your information and send a preliminary assessment of your case based on your goals.
       </p>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
+      <form onSubmit={handleSubmit}>
+        <JsonForms
+          schema={schemaAbove}
+          uischema={uiSchemaAbove}
+          data={formData}
+          renderers={[...materialRenderers]}
+          validationMode={ isSubmitted ? "ValidateAndShow" : "ValidateAndHide"}
+          onChange={({ data }) => {
+            setFormData(data as FormData);
+          }}
+          
+        />
+        <div className={`flex items-center space-x-4 border ${isSubmitted && errors.resume ? "border-red-500" : "border-gray-300"} rounded p-2`}>
+          <label className={`${isSubmitted && errors.resume ? 'text-red-500' : 'text-gray-500'} w-1/3`} htmlFor="resume">
+            Upload Resume
+          </label>
           <input
-            type="text"
-            name="firstName"
-            placeholder="First Name"
-            value={formData.firstName}
-            onChange={handleChange}
-            required
-            className="w-full p-3 border border-gray-300 rounded-lg"
-          />
-        </div>
-        
-        <div>
-          <input
-            type="text"
-            name="lastName"
-            placeholder="Last Name"
-            value={formData.lastName}
-            onChange={handleChange}
-            required
-            className="w-full p-3 border border-gray-300 rounded-lg"
-          />
-        </div>
-
-        <div>
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="w-full p-3 border border-gray-300 rounded-lg"
-          />
-        </div>
-
-        <div>
-          <input
-            type="text"
-            name="citizenship"
-            placeholder="Country of Citizenship"
-            value={formData.citizenship}
-            onChange={handleChange}
-            required
-            className="w-full p-3 border border-gray-300 rounded-lg"
-          />
-        </div>
-
-        <div>
-          <input
-            type="text"
-            name="website"
-            placeholder="LinkedIn / Personal Website URL"
-            value={formData.website}
-            onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg"
-          />
-        </div>
-
-        <div>
-          <input
+            id="resume"
             type="file"
-            name="resume"
+            className={`w-2/3 ${isSubmitted && errors.resume ? 'text-red-500' : 'text-gray-700'} focus:outline-none`}
             onChange={handleFileChange}
-            required
-            className="w-full p-3 border border-gray-300 rounded-lg"
           />
         </div>
-
-        <div className="text-left">
-          <p className="mb-2">Visa categories of interest?</p>
-          <label className="block">
-            <input type="checkbox" value="O1" onChange={handleCheckboxChange} className="mr-2" />
-            O1
-          </label>
-          <label className="block">
-            <input type="checkbox" value="EB1A" onChange={handleCheckboxChange} className="mr-2" />
-            EB-1A
-          </label>
-          <label className="block">
-            <input type="checkbox" value="EB2-NIW" onChange={handleCheckboxChange} className="mr-2" />
-            EB2-NIW
-          </label>
-          <label className="block">
-            <input type="checkbox" value="I don't know" onChange={handleCheckboxChange} className="mr-2" />
-            I don't know
-          </label>
-        </div>
-
-        <div>
-          <textarea
-            name="helpText"
-            placeholder="How can we help you?"
-            value={formData.helpText}
-            onChange={handleChange}
-            required
-            className="w-full p-3 border border-gray-300 rounded-lg"
-          />
-        </div>
-
+        {isSubmitted && errors.resume && (
+          <p className="text-red-500 text-sm mt-1">{errors.resume}</p>
+        )}
+        <JsonForms
+          schema={schemaBelow}
+          uischema={uiSchemaBelow}
+          data={formData}
+          renderers={[...materialRenderers]}
+          validationMode={ isSubmitted ? "ValidateAndShow" : "ValidateAndHide"}
+          onChange={({ data }) => {
+            setFormData(data as FormData);
+          }}
+        />
         <button type="submit" className="bg-gray-800 text-white py-3 px-6 rounded-lg">
           Submit
         </button>

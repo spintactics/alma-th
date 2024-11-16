@@ -5,14 +5,17 @@
     "lastName": { "type": "string", "title": "Last Name" },
     "email": { "type": "string", "format": "email", "title": "Email" },
     "citizenship": { "type": "string", "title": "Country of Citizenship" },
-    "website": { "type": "string", "format": "uri", "title": "LinkedIn / Personal Website" },
-    "resume": { "type": "string", "title": "Resume", "format": "data-url" },
+    "website": { "type": "string", "title": "LinkedIn / Personal Website URL" },
     "visaCategories": {
       "type": "array",
-      "items": { "type": "string", "enum": ["O-1", "EB-1A", "EB-2 NIW", "I don't know"] },
-      "title": "Visa categories of interest?"
+      "title": "Visa Categories of Interest",
+      "items": {
+        "type": "string",
+        "enum": ["O-1", "EB-1A", "EB-2 NIW", "I don't know"]
+      },
+      "uniqueItems": true
     },
     "helpText": { "type": "string", "title": "How Can We Help You?" }
   },
-  "required": ["firstName", "lastName", "email", "citizenship", "helpText"]
+  "required": ["firstName", "lastName", "email", "citizenship", "website", "visaCategories", "helpText"]
 }
